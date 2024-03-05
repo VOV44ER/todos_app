@@ -1,3 +1,6 @@
 {
-  "extends": "next/core-web-vitals"
+  "extends": [
+    "@wemake-services/javascript",
+    "@wemake-services/typescript/recommended"
+  ]
 }
