@@ -1,46 +1,48 @@
 /* eslint-disable max-len */
 import React, { useState, useEffect } from 'react'
-
-interface Task {
-  name: string
-  completed: boolean
-}
-
-type FilterType = 'all' | 'completed' | 'current'
+import { add, complete, selectTodos } from '../lib/features/todos/todos-slice'
+import { useAppDispatch, useAppSelector } from '@/lib/hooks'
+import { FilterType, Todo } from '@/types/types'
+import { v4 as uuidv4 } from 'uuid'
 
 const Home: React.FC = () => {
-  const [tasks, setTasks] = useState<Task[]>([])
+  const dispatch = useAppDispatch()
+  const tasks = useAppSelector(selectTodos)
+
   const [inputValue, setInputValue] = useState<string>('')
   const [filter, setFilter] = useState<'all' | 'completed' | 'current'>('all')
-  const [filteredTasks, setFilteredTasks] = useState<Task[]>([])
+  const [filteredTasks, setFilteredTasks] = useState<Todo[]>([])
 
   useEffect(() => {
-    const updateFilteredTasks = (): void => {
-      let filtered
-      if (filter === 'completed') {
-        filtered = tasks.filter((task) => task.completed)
-      } else if (filter === 'current') {
-        filtered = tasks.filter((task) => !task.completed)
-      } else {
-        filtered = tasks
-      }
-      setFilteredTasks(filtered)
-    }
-
     updateFilteredTasks()
   }, [tasks, filter])
 
+  const updateFilteredTasks = (): void => {
+    let filtered
+    if (filter === 'completed') {
+      filtered = tasks.filter((task) => task.completed)
+    } else if (filter === 'current') {
+      filtered = tasks.filter((task) => !task.completed)
+    } else {
+      filtered = tasks
+    }
+    setFilteredTasks(filtered)
+  }
+
   const addTask = (): void => {
     if (inputValue.trim().length > 0) {
-      setTasks([...tasks, { 'name': inputValue, 'completed': false }])
+      const newTask: Todo = {
+        'id': uuidv4(),
+        'name': inputValue,
+        'completed': false,
+      }
+      dispatch(add(newTask))
       setInputValue('')
     }
   }
 
-  const toggleCompletion = (index: number): void => {
-    const updatedTasks = [...tasks]
-    updatedTasks[index].completed = !updatedTasks[index].completed
-    setTasks(updatedTasks)
+  const toggleCompletion = (id: string): void => {
+    dispatch(complete(id))
   }
 
   const completedCount = tasks.filter((task) => task.completed).length
@@ -85,6 +87,7 @@ const Home: React.FC = () => {
         <ul className="flex-column space-y space-y-4 text-sm font-medium text-gray-400 md:me-4 mb-4 md:mb-0">
           {data.map(({ name, value, count }) => <li>
             <div
+              key={name}
               className={`flex relative justify-center cursor-pointer items-center px-4 py-3 rounded-lg active w-full ${
                 filter === name ? 'bg-green-500 text-white' : 'text-green-500 bg-white'
               }`}
@@ -99,12 +102,12 @@ const Home: React.FC = () => {
           </li>)}
         </ul>
         <div className="p-6 bg-gray-50 min-w-[400px] text-medium text-gray-500 rounded-lg w-full">
-          {filteredTasks.map((task, index) => <li
-            key={index}
+          {filteredTasks.map((task) => <li
+            key={task.id}
             className={`cursor-pointer ${
               task.completed ? 'line-through text-gray-500' : ''
             }`}
-            onClick={() => toggleCompletion(index)}
+            onClick={() => toggleCompletion(task.id)}
           >
             {task.name}
           </li>)}
