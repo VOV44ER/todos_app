@@ -3,7 +3,10 @@ import type { RootState } from '../../store'
 import { Todo, TodosState } from '@/types/types'
 
 const initialState: TodosState = {
-  'todos': [],
+  'todos': [
+    { 'name': 'some uncompleted todo', 'completed': false, 'id': '1' },
+    { 'name': 'some completed todo', 'completed': true, 'id': '2' },
+  ],
 }
 
 export const todosSlice = createSlice({
