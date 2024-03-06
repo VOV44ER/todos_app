@@ -4,6 +4,7 @@ import { add, complete, selectTodos } from '../lib/features/todos/todos-slice'
 import { useAppDispatch, useAppSelector } from '@/lib/hooks'
 import { FilterType, Todo } from '@/types/types'
 import { v4 as uuidv4 } from 'uuid'
+import toast from 'react-hot-toast'
 
 const Home: React.FC = () => {
   const dispatch = useAppDispatch()
@@ -30,15 +31,23 @@ const Home: React.FC = () => {
   }
 
   const addTask = (): void => {
-    if (inputValue.trim().length > 0) {
-      const newTask: Todo = {
-        'id': uuidv4(),
-        'name': inputValue,
-        'completed': false,
-      }
-      dispatch(add(newTask))
-      setInputValue('')
+    if (inputValue.trim().length === 0) {
+      toast.error('Please enter a task.')
+      return
     }
+
+    if (inputValue.trim().length > 20) {
+      toast.error('Task length cannot exceed 20 characters.')
+      return
+    }
+
+    const newTask: Todo = {
+      'id': uuidv4(),
+      'name': inputValue,
+      'completed': false,
+    }
+    dispatch(add(newTask))
+    setInputValue('')
   }
 
   const toggleCompletion = (id: string): void => {
